@@ -1,78 +1,174 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Network, Database, Zap, ShieldCheck, ArrowRight, CreditCard, RefreshCcw, WifiOff, XCircle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  Network, Database, Zap, ShieldCheck, ArrowRight, 
+  CreditCard, RefreshCcw, WifiOff, XCircle, CheckCircle2, 
+  AlertCircle, CornerRightDown 
+} from 'lucide-react';
 
-const FlowSection = ({ title, steps, color = "var(--accent-color)" }) => (
-  <motion.div 
-    className="glass-card" 
-    style={{ marginBottom: '2rem', borderLeft: `4px solid ${color}` }}
-    initial={{ opacity: 0, x: -20 }}
-    whileInView={{ opacity: 1, x: 0 }}
-    viewport={{ once: true }}
-  >
-    <h3 style={{ color: color, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-      {title}
-    </h3>
-    <div className="flow-container">
-      {steps.map((step, idx) => (
-        <React.Fragment key={idx}>
-          <div className="flow-node" style={{ borderColor: step.type === 'decision' ? '#f59e0b' : color }}>
-            {step.icon}
-            <div className="node-content">
-              <span className="node-label">{step.label}</span>
-              {step.sub && <span className="node-sub">{step.sub}</span>}
+const LogicNode = ({ label, sub, icon, type, color, branches }) => {
+  return (
+    <div className="logic-node-wrapper">
+      <div className={`logic-node ${type}`} style={{ borderColor: color }}>
+        <div className="node-icon" style={{ background: `${color}22`, color: color }}>
+          {icon}
+        </div>
+        <div className="node-text">
+          <span className="node-label">{label}</span>
+          <span className="node-sub">{sub}</span>
+        </div>
+        {type === 'decision' && <div className="decision-badge">?</div>}
+      </div>
+      
+      {branches && (
+        <div className="node-branches">
+          {branches.map((branch, idx) => (
+            <div key={idx} className={`branch-path ${branch.type}`}>
+              <div className="branch-line">
+                {branch.type === 'no' ? <CornerRightDown size={20} /> : <ArrowRight size={20} />}
+              </div>
+              <div className="branch-content">
+                <span className={`branch-tag ${branch.type}`}>{branch.type === 'yes' ? 'SIM' : 'NÃO'}</span>
+                <LogicNode {...branch.node} color={branch.type === 'yes' ? color : '#f43f5e'} />
+              </div>
             </div>
-            {step.type === 'decision' && <div className="decision-tag">DECISÃO</div>}
-          </div>
-          {idx < steps.length - 1 && <ArrowRight size={20} className="flow-arrow" />}
-        </React.Fragment>
-      ))}
+          ))}
+        </div>
+      )}
     </div>
-  </motion.div>
-);
+  );
+};
 
 const Solucao = () => {
-  const fluxos = [
+  const fluxosLógicos = [
     {
-      title: "Fluxo de Compra (Online/Offline)",
+      title: "Fluxo de Compra e Pagamento",
       color: "#00ff88",
-      steps: [
-        { label: "Seleção", sub: "Tipo de Bilhete", icon: <CreditCard size={18} /> },
-        { label: "Stock?", type: "decision", sub: "Verificar Disponibilidade", icon: <Database size={18} /> },
-        { label: "Pagamento", sub: "MBWay/Cartão/PayPal", icon: <Zap size={18} /> },
-        { label: "Aprovação", type: "decision", sub: "Gateway de Pagamento", icon: <ShieldCheck size={18} /> },
-        { label: "Ativação", sub: "Gerar ID & RFID", icon: <CheckCircle2 size={18} /> }
-      ]
+      root: {
+        label: "Nova Compra",
+        sub: "Seleção de Bilhete",
+        icon: <CreditCard />,
+        branches: [
+          {
+            type: "yes",
+            node: {
+              label: "Disponível?",
+              type: "decision",
+              sub: "Check Database",
+              icon: <Database />,
+              branches: [
+                {
+                  type: "no",
+                  node: { label: "Esgotado", sub: "Fim do Processo", icon: <XCircle />, type: "end" }
+                },
+                {
+                  type: "yes",
+                  node: {
+                    label: "Pagamento",
+                    sub: "Gateway / MBWay",
+                    icon: <Zap />,
+                    branches: [
+                      {
+                        type: "no",
+                        node: { label: "Recusado", sub: "Erro de Transação", icon: <AlertCircle />, type: "end" }
+                      },
+                      {
+                        type: "yes",
+                        node: { label: "Ativo", sub: "Gerar RFID / Email", icon: <CheckCircle2 />, type: "end" }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      title: "Fluxo de Validação (Acesso RFID)",
+      title: "Fluxo de Validação de Acesso (Offline-First)",
       color: "#3b82f6",
-      steps: [
-        { label: "Leitura", sub: "Scan Pulseira", icon: <Zap size={18} /> },
-        { label: "Cache Local", sub: "Procurar Bilhete", icon: <Database size={18} /> },
-        { label: "Validar", type: "decision", sub: "Estado/Porta/Data", icon: <ShieldCheck size={18} /> },
-        { label: "Registo", sub: "Entrada Local", icon: <CheckCircle2 size={18} /> }
-      ]
+      root: {
+        label: "Leitura RFID",
+        sub: "Scan Pulseira",
+        icon: <Zap />,
+        branches: [
+          {
+            type: "yes",
+            node: {
+              label: "Existe Cache?",
+              type: "decision",
+              sub: "Base Dados Local",
+              icon: <Database />,
+              branches: [
+                {
+                  type: "no",
+                  node: { label: "Negado", sub: "Bilhete Inexistente", icon: <XCircle />, type: "end" }
+                },
+                {
+                  type: "yes",
+                  node: {
+                    label: "Válido?",
+                    type: "decision",
+                    sub: "Blacklist / Porta",
+                    icon: <ShieldCheck />,
+                    branches: [
+                      {
+                        type: "no",
+                        node: { label: "Barrado", sub: "Porta ou Data Errada", icon: <AlertCircle />, type: "end" }
+                      },
+                      {
+                        type: "yes",
+                        node: { label: "Acesso", sub: "Portão Aberto", icon: <CheckCircle2 />, type: "end" }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
-      title: "Fluxo Offline & Sincronização",
-      color: "#a855f7",
-      steps: [
-        { label: "Modo Offline", sub: "Cache e Fila Local", icon: <WifiOff size={18} /> },
-        { label: "Ligação?", type: "decision", sub: "Detectar Internet", icon: <Network size={18} /> },
-        { label: "Sync", sub: "Enviar Logs / Receber Blacklist", icon: <RefreshCcw size={18} /> },
-        { label: "Update", sub: "Atualizar Cache Local", icon: <Database size={18} /> }
-      ]
-    },
-    {
-      title: "Fluxo de Reembolso (Caso Kanye)",
+      title: "Sincronização de Dados e Reembolsos",
       color: "#f43f5e",
-      steps: [
-        { label: "Pedido", sub: "Portal do Cliente", icon: <AlertCircle size={18} /> },
-        { label: "Elegível?", type: "decision", sub: "Verificar Regras", icon: <ShieldCheck size={18} /> },
-        { label: "Anulação", sub: "Blacklist & Invalidação", icon: <XCircle size={18} /> },
-        { label: "Estorno", sub: "Devolução de Valor", icon: <CreditCard size={18} /> }
-      ]
+      root: {
+        label: "Pedido Reembolso",
+        sub: "Portal Cliente",
+        icon: <RefreshCcw />,
+        branches: [
+          {
+            type: "yes",
+            node: {
+              label: "Elegível?",
+              type: "decision",
+              sub: "Check Regras",
+              icon: <ShieldCheck />,
+              branches: [
+                {
+                  type: "no",
+                  node: { label: "Rejeitado", sub: "Fora de Prazo", icon: <XCircle />, type: "end" }
+                },
+                {
+                  type: "yes",
+                  node: {
+                    label: "Sync Blacklist",
+                    sub: "Update Terminais",
+                    icon: <Network />,
+                    branches: [
+                      {
+                        type: "yes",
+                        node: { label: "Concluído", sub: "ID Inutilizado", icon: <CheckCircle2 />, type: "end" }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
     }
   ];
 
@@ -83,80 +179,117 @@ const Solucao = () => {
         animate={{ opacity: 1, y: 0 }}
         style={{ textAlign: 'center', marginBottom: '3rem' }}
       >
-        <h1 className="glowing-text" style={{ fontSize: '3rem' }}>Lógica da <span className="text-accent">Solução</span></h1>
-        <p className="text-secondary">Processos detalhados de transação, segurança e contingência offline.</p>
+        <h1 className="glowing-text" style={{ fontSize: '3rem' }}>Fluxos de <span className="text-accent">Decisão</span></h1>
+        <p className="text-secondary">Lógica condicional aplicada à integridade da base de dados.</p>
       </motion.div>
 
-      <div style={{ width: '100%' }}>
-        {fluxos.map((fluxo, i) => (
-          <FlowSection key={i} {...fluxo} />
+      <div className="logic-flows-wrapper">
+        {fluxosLógicos.map((fluxo, i) => (
+          <div key={i} className="flow-card-full">
+            <h2 style={{ color: fluxo.color, marginBottom: '2rem' }}>{fluxo.title}</h2>
+            <div className="logic-tree">
+              <LogicNode {...fluxo.root} color={fluxo.color} />
+            </div>
+          </div>
         ))}
       </div>
 
-      <div className="grid-2_col" style={{ marginTop: '2rem' }}>
-        <div className="glass-card">
-          <h3 className="text-accent">Arquitetura de Dados</h3>
-          <p className="text-secondary" style={{ fontSize: '0.9rem' }}>
-            Para suportar <strong>1000+ leituras/segundo</strong>, utilizamos Redis para cache de bilhetes ativos e PostgreSQL para persistência. 
-            Em caso de cancelamento de artista, alteramos apenas o estado na tabela <code>Cartaz</code>, propagando a invalidação instantaneamente.
-          </p>
-        </div>
-        <div className="glass-card">
-          <h3 className="text-accent">Protocolo de Emergência</h3>
-          <p className="text-secondary" style={{ fontSize: '0.9rem' }}>
-            O fluxo de sincronização garante que mesmo leitores sem rede recebam a <strong>Blacklist</strong> de reembolsos assim que detectam 1ms de conetividade, 
-            impedindo o uso de bilhetes já devolvidos.
-          </p>
-        </div>
-      </div>
-
       <style dangerouslySetInnerHTML={{ __html: `
-        .flow-container {
+        .logic-flows-wrapper {
           display: flex;
-          align-items: center;
-          gap: 1rem;
-          overflow-x: auto;
-          padding: 10px 5px;
-          scrollbar-width: thin;
+          flex-direction: column;
+          gap: 4rem;
+          width: 100%;
         }
-        .flow-node {
-          min-width: 160px;
+        .flow-card-full {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 24px;
+          padding: 3rem;
+          overflow-x: auto;
+        }
+        .logic-tree {
+          display: flex;
+          justify-content: flex-start;
+          min-width: fit-content;
+        }
+        .logic-node-wrapper {
+          display: flex;
+          align-items: flex-start;
+        }
+        .logic-node {
+          width: 180px;
           padding: 1rem;
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 12px;
           display: flex;
-          align-items: center;
           gap: 12px;
           position: relative;
+          z-index: 2;
         }
-        .node-content {
+        .logic-node.decision { background: rgba(245, 158, 11, 0.05); }
+        .logic-node.end { background: rgba(244, 63, 94, 0.05); }
+        
+        .node-icon {
+          padding: 8px;
+          border-radius: 8px;
           display: flex;
-          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
-        .node-label {
-          font-weight: 700;
-          font-size: 0.9rem;
-          color: #fff;
-        }
-        .node-sub {
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-        }
-        .decision-tag {
+        .node-text { display: flex; flex-direction: column; }
+        .node-label { font-weight: 700; font-size: 0.85rem; color: #fff; }
+        .node-sub { font-size: 0.7rem; color: var(--text-secondary); }
+        
+        .decision-badge {
           position: absolute;
           top: -8px;
-          right: 10px;
+          right: -8px;
           background: #f59e0b;
           color: #000;
-          font-size: 0.6rem;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-weight: 900;
+          font-size: 0.7rem;
+        }
+
+        .node-branches {
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          margin-left: 0;
+        }
+        .branch-path {
+          display: flex;
+          align-items: flex-start;
+        }
+        .branch-line {
+          margin: 20px 10px 0 10px;
+          color: rgba(255, 255, 255, 0.2);
+        }
+        .branch-content {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .branch-tag {
+          font-size: 0.6rem;
+          font-weight: 800;
           padding: 2px 6px;
           border-radius: 4px;
+          width: fit-content;
         }
-        .flow-arrow {
-          color: rgba(255, 255, 255, 0.2);
-          flex-shrink: 0;
+        .branch-tag.yes { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .branch-tag.no { background: rgba(244, 63, 94, 0.2); color: #f43f5e; }
+
+        @media (max-width: 900px) {
+          .logic-node { width: 140px; }
+          .flow-card-full { padding: 1.5rem; }
         }
       `}} />
     </div>
@@ -164,3 +297,4 @@ const Solucao = () => {
 };
 
 export default Solucao;
+
