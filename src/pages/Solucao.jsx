@@ -115,13 +115,13 @@ const Solucao = () => {
       color: "#3b82f6",
       root: {
         label: "Leitura RFID",
-        sub: "Início da Validação",
+        sub: "Início Processo",
         icon: <Zap />,
         branches: [
           {
             type: "yes",
             node: {
-              label: "Procurar Bilhete",
+              label: "Procurar bilhete",
               sub: "(cache local)",
               icon: <Database />,
               branches: [
@@ -130,45 +130,45 @@ const Solucao = () => {
                   node: {
                     label: "Bilhete existe?",
                     type: "decision",
-                    sub: "Check Cache",
+                    sub: "Verificação DB",
                     icon: <ShieldCheck />,
                     branches: [
                       {
                         type: "no",
-                        node: { label: "Fim", sub: "Acesso Negado", icon: <ArrowRight />, type: "end" }
+                        node: { label: "Fim", sub: "Bilhete Inexistente", icon: <ArrowRight />, type: "end" }
                       },
                       {
                         type: "yes",
                         node: {
                           label: "Bilhete inválido?",
                           type: "decision",
-                          sub: "Estado do Bilhete",
+                          sub: "Check Estado",
                           icon: <XCircle />,
                           branches: [
                             {
                               type: "yes",
                               node: { 
-                                label: "Bilhete Inválido", 
-                                sub: "Bloqueado", 
+                                label: "Bilhete inválido", 
+                                sub: "Estado Inválido", 
                                 icon: <XCircle />, 
                                 branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
                               }
                             },
                             {
-                              type: "yes",
+                              type: "no",
                               node: {
                                 label: "Porta Correta?",
                                 type: "decision",
-                                sub: "Validação de Zona",
+                                sub: "Zona de Acesso",
                                 icon: <Network />,
                                 branches: [
                                   {
                                     type: "no",
                                     node: { 
-                                      label: "Porta Errada", 
+                                      label: "Negado", 
                                       sub: "Bilhete não é por hoje", 
                                       icon: <AlertCircle />, 
-                                      branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                                      branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
                                     }
                                   },
                                   {
@@ -176,20 +176,20 @@ const Solucao = () => {
                                     node: {
                                       label: "Já Registada?",
                                       type: "decision",
-                                      sub: "Controlo Duplicado",
+                                      sub: "Controlo de Entrada",
                                       icon: <RefreshCcw />,
                                       branches: [
                                         {
                                           type: "yes",
                                           node: { 
-                                            label: "Já Registada", 
-                                            sub: "Entrada Duplicada", 
+                                            label: "Entrada Já Registada", 
+                                            sub: "Duplicado", 
                                             icon: <AlertCircle />, 
-                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
                                           }
                                         },
                                         {
-                                          type: "yes",
+                                          type: "no",
                                           node: {
                                             label: "Permitir Acesso",
                                             sub: "Registar entrada local",
@@ -216,71 +216,51 @@ const Solucao = () => {
       }
     },
     {
-      title: "Fluxo OFFLINE (Sincronização)",
+      title: "Fluxo OFFLINE (Validação)",
       color: "#a855f7",
       root: {
         label: "Leitura RFID",
-        sub: "Início Processo",
+        sub: "Modo de Contingência",
         icon: <Zap />,
         branches: [
           {
             type: "yes",
             node: {
               label: "Validar BD Local",
-              sub: "(Cache Local)",
+              sub: "(Cache Offline)",
               icon: <Database />,
               branches: [
                 {
                   type: "yes",
                   node: {
-                    label: "Registar Entrada",
-                    sub: "Localmente",
-                    icon: <CheckCircle2 />,
+                    label: "Validar Acesso",
+                    type: "decision",
+                    sub: "Estado/Porta",
+                    icon: <ShieldCheck />,
                     branches: [
+                      {
+                        type: "no",
+                        node: { 
+                          label: "Negado", 
+                          sub: "Inválido ou Fora de Zona", 
+                          icon: <XCircle />, 
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
+                        }
+                      },
                       {
                         type: "yes",
                         node: {
-                          label: "Guardar Evento",
-                          sub: "(Fila Local)",
+                          label: "Registo Local",
+                          sub: "Pendente de Sync",
                           icon: <Database />,
                           branches: [
                             {
                               type: "yes",
-                              node: {
-                                label: "Existe Ligação?",
-                                type: "decision",
-                                sub: "Verificar Rede",
-                                icon: <Network />,
-                                branches: [
-                                  {
-                                    type: "no",
-                                    node: { 
-                                      label: "Offline", 
-                                      sub: "Continuar Offline", 
-                                      icon: <WifiOff />, 
-                                      branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Pendente", icon: <ArrowRight />, type: "end" } }]
-                                    }
-                                  },
-                                  {
-                                    type: "yes",
-                                    node: {
-                                      label: "Sincronizar",
-                                      sub: "Enviar Logs / Receber Updates",
-                                      icon: <RefreshCcw />,
-                                      branches: [
-                                        {
-                                          type: "yes",
-                                          node: { 
-                                            label: "Update Cache", 
-                                            sub: "Sync Completo", 
-                                            icon: <Database />, 
-                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Sincronizado", icon: <ArrowRight />, type: "end" } }]
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                ]
+                              node: { 
+                                label: "Permitir", 
+                                sub: "Portão Aberto", 
+                                icon: <CheckCircle2 />, 
+                                branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Offline", icon: <ArrowRight />, type: "end" } }]
                               }
                             }
                           ]
