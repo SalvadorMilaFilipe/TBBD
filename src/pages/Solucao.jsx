@@ -77,7 +77,7 @@ const Solucao = () => {
                         type: "yes",
                         node: {
                           label: "Método Pagamento",
-                          sub: "MBWay, Multibanco, etc",
+                          sub: "MBWay, Multibanco, Visa/Mastercard, PayPal",
                           icon: <Zap />,
                           branches: [
                             {
@@ -93,9 +93,9 @@ const Solucao = () => {
                               type: "yes",
                               node: { 
                                 label: "Ativo", 
-                                sub: "Gerar RFID / Email", 
+                                sub: "Gerar bilhete (ID único), Associar Bilhete, Gerar RFID", 
                                 icon: <CheckCircle2 />, 
-                                branches: [{ type: "yes", node: { label: "Fim", sub: "Sucesso", icon: <ArrowRight />, type: "end" } }]
+                                branches: [{ type: "yes", node: { label: "Fim", sub: "Com Estado Ativo e Confirmação enviada", icon: <ArrowRight />, type: "end" } }]
                               }
                             }
                           ]
@@ -235,12 +235,59 @@ const Solucao = () => {
 
       <div className="logic-flows-wrapper">
         {fluxosLógicos.map((fluxo, i) => (
-          <div key={i} className="flow-card-full">
-            <h2 style={{ color: fluxo.color, marginBottom: '2rem' }}>{fluxo.title}</h2>
-            <div className="logic-tree">
-              <LogicNode {...fluxo.root} color={fluxo.color} />
+          <React.Fragment key={i}>
+            <div className="flow-card-full">
+              <h2 style={{ color: fluxo.color, marginBottom: '2rem' }}>{fluxo.title}</h2>
+              <div className="logic-tree">
+                <LogicNode {...fluxo.root} color={fluxo.color} />
+              </div>
             </div>
-          </div>
+            
+            {i === 0 && (
+              <motion.div 
+                className="glass-card" 
+                style={{ borderLeft: '4px solid #00ff88', background: 'rgba(0, 255, 136, 0.02)' }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>Matriz de Confirmação de Pagamento</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="payment-table">
+                    <thead>
+                      <tr>
+                        <th>Método</th>
+                        <th>Tipo de Confirmação</th>
+                        <th>Impacto no Fluxo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>MBWay</strong></td>
+                        <td><span className="badge-immediate">IMEDIATA</span></td>
+                        <td>Geração instantânea da pulseira RFID.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Cartão (Visa/MC)</strong></td>
+                        <td><span className="badge-immediate">IMEDIATA</span></td>
+                        <td>Geração instantânea da pulseira RFID.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>PayPal</strong></td>
+                        <td><span className="badge-redirect">REDIRECIONAMENTO</span></td>
+                        <td>Confirmação após retorno da gateway externa.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Multibanco</strong></td>
+                        <td><span className="badge-delay">DIFERIDA / DEMORA</span></td>
+                        <td>Estado 'Pendente' até confirmação da rede SIBS.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </motion.div>
+            )}
+          </React.Fragment>
         ))}
       </div>
 
@@ -340,6 +387,51 @@ const Solucao = () => {
         @media (max-width: 900px) {
           .logic-node { width: 140px; }
           .flow-card-full { padding: 1.5rem; }
+        }
+
+        .payment-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+          color: #fff;
+          font-size: 0.9rem;
+        }
+        .payment-table th {
+          text-align: left;
+          padding: 12px;
+          border-bottom: 2px solid rgba(255,255,255,0.1);
+          color: var(--accent-color);
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 1px;
+        }
+        .payment-table td {
+          padding: 12px;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .badge-immediate {
+          background: rgba(0, 255, 136, 0.1);
+          color: #00ff88;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+        .badge-redirect {
+          background: rgba(59, 130, 246, 0.1);
+          color: #3b82f6;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+        .badge-delay {
+          background: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 700;
         }
       `}} />
     </div>
