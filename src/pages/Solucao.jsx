@@ -111,7 +111,7 @@ const Solucao = () => {
       }
     },
     {
-      title: "Fluxo de Validação de Acesso (Offline-First)",
+      title: "Fluxo de Validação de Acesso (Online/Offline)",
       color: "#3b82f6",
       root: {
         label: "Leitura RFID",
@@ -171,7 +171,87 @@ const Solucao = () => {
       }
     },
     {
-      title: "Sincronização de Dados e Reembolsos",
+      title: "Fluxo OFFLINE (Sincronização)",
+      color: "#a855f7",
+      root: {
+        label: "Leitura RFID",
+        sub: "Início Processo",
+        icon: <Zap />,
+        branches: [
+          {
+            type: "yes",
+            node: {
+              label: "Validar BD Local",
+              sub: "(Cache Local)",
+              icon: <Database />,
+              branches: [
+                {
+                  type: "yes",
+                  node: {
+                    label: "Registar Entrada",
+                    sub: "Localmente",
+                    icon: <CheckCircle2 />,
+                    branches: [
+                      {
+                        type: "yes",
+                        node: {
+                          label: "Guardar Evento",
+                          sub: "(Fila Local)",
+                          icon: <Database />,
+                          branches: [
+                            {
+                              type: "yes",
+                              node: {
+                                label: "Existe Ligação?",
+                                type: "decision",
+                                sub: "Verificar Rede",
+                                icon: <Network />,
+                                branches: [
+                                  {
+                                    type: "no",
+                                    node: { 
+                                      label: "Offline", 
+                                      sub: "Continuar Offline", 
+                                      icon: <WifiOff />, 
+                                      branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Pendente", icon: <ArrowRight />, type: "end" } }]
+                                    }
+                                  },
+                                  {
+                                    type: "yes",
+                                    node: {
+                                      label: "Sincronizar",
+                                      sub: "Enviar Logs / Receber Updates",
+                                      icon: <RefreshCcw />,
+                                      branches: [
+                                        {
+                                          type: "yes",
+                                          node: { 
+                                            label: "Update Cache", 
+                                            sub: "Sync Completo", 
+                                            icon: <Database />, 
+                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Sincronizado", icon: <ArrowRight />, type: "end" } }]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      title: "Fluxo de Reembolso (Caso Kanye)",
       color: "#f43f5e",
       root: {
         label: "Pedido Reembolso",
