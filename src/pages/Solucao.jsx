@@ -111,54 +111,99 @@ const Solucao = () => {
       }
     },
     {
-      title: "Fluxo de Validação de Acesso (Online/Offline)",
+      title: "Fluxo de Validação de Acesso (com RFID)",
       color: "#3b82f6",
       root: {
         label: "Leitura RFID",
-        sub: "Scan Pulseira",
+        sub: "Início da Validação",
         icon: <Zap />,
         branches: [
           {
             type: "yes",
             node: {
-              label: "Existe Cache?",
-              type: "decision",
-              sub: "Base Dados Local",
+              label: "Procurar Bilhete",
+              sub: "(cache local)",
               icon: <Database />,
               branches: [
                 {
-                  type: "no",
-                  node: { 
-                    label: "Negado", 
-                    sub: "Inexistente", 
-                    icon: <XCircle />, 
-                    branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
-                  }
-                },
-                {
                   type: "yes",
                   node: {
-                    label: "Válido?",
+                    label: "Bilhete existe?",
                     type: "decision",
-                    sub: "Blacklist / Porta",
+                    sub: "Check Cache",
                     icon: <ShieldCheck />,
                     branches: [
                       {
                         type: "no",
-                        node: { 
-                          label: "Barrado", 
-                          sub: "Inválido / Errado", 
-                          icon: <AlertCircle />, 
-                          branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
-                        }
+                        node: { label: "Fim", sub: "Acesso Negado", icon: <ArrowRight />, type: "end" }
                       },
                       {
                         type: "yes",
-                        node: { 
-                          label: "Acesso", 
-                          sub: "Portão Aberto", 
-                          icon: <CheckCircle2 />, 
-                          branches: [{ type: "yes", node: { label: "Fim", sub: "Entrada Registada", icon: <ArrowRight />, type: "end" } }]
+                        node: {
+                          label: "Bilhete inválido?",
+                          type: "decision",
+                          sub: "Estado do Bilhete",
+                          icon: <XCircle />,
+                          branches: [
+                            {
+                              type: "yes",
+                              node: { 
+                                label: "Bilhete Inválido", 
+                                sub: "Bloqueado", 
+                                icon: <XCircle />, 
+                                branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                              }
+                            },
+                            {
+                              type: "yes",
+                              node: {
+                                label: "Porta Correta?",
+                                type: "decision",
+                                sub: "Validação de Zona",
+                                icon: <Network />,
+                                branches: [
+                                  {
+                                    type: "no",
+                                    node: { 
+                                      label: "Porta Errada", 
+                                      sub: "Bilhete não é por hoje", 
+                                      icon: <AlertCircle />, 
+                                      branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                                    }
+                                  },
+                                  {
+                                    type: "yes",
+                                    node: {
+                                      label: "Já Registada?",
+                                      type: "decision",
+                                      sub: "Controlo Duplicado",
+                                      icon: <RefreshCcw />,
+                                      branches: [
+                                        {
+                                          type: "yes",
+                                          node: { 
+                                            label: "Já Registada", 
+                                            sub: "Entrada Duplicada", 
+                                            icon: <AlertCircle />, 
+                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                                          }
+                                        },
+                                        {
+                                          type: "yes",
+                                          node: {
+                                            label: "Permitir Acesso",
+                                            sub: "Registar entrada local",
+                                            icon: <CheckCircle2 />,
+                                            branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Concedido", icon: <ArrowRight />, type: "end" } }]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
