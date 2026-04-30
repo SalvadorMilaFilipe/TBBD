@@ -59,22 +59,47 @@ const Solucao = () => {
               branches: [
                 {
                   type: "no",
-                  node: { label: "Esgotado", sub: "Fim do Processo", icon: <XCircle />, type: "end" }
+                  node: { 
+                    label: "Esgotado", 
+                    sub: "Notificar Utilizador", 
+                    icon: <XCircle />, 
+                    branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                  }
                 },
                 {
                   type: "yes",
                   node: {
-                    label: "Pagamento",
-                    sub: "Gateway / MBWay",
-                    icon: <Zap />,
+                    label: "Registo Compra",
+                    sub: "estado de pagamento pendente",
+                    icon: <Database />,
                     branches: [
                       {
-                        type: "no",
-                        node: { label: "Recusado", sub: "Erro de Transação", icon: <AlertCircle />, type: "end" }
-                      },
-                      {
                         type: "yes",
-                        node: { label: "Ativo", sub: "Gerar RFID / Email", icon: <CheckCircle2 />, type: "end" }
+                        node: {
+                          label: "Método Pagamento",
+                          sub: "MBWay, Multibanco, etc",
+                          icon: <Zap />,
+                          branches: [
+                            {
+                              type: "no",
+                              node: { 
+                                label: "Recusado", 
+                                sub: "Erro na Gateway", 
+                                icon: <AlertCircle />, 
+                                branches: [{ type: "yes", node: { label: "Fim", sub: "Tentar Novamente", icon: <ArrowRight />, type: "end" } }]
+                              }
+                            },
+                            {
+                              type: "yes",
+                              node: { 
+                                label: "Ativo", 
+                                sub: "Gerar RFID / Email", 
+                                icon: <CheckCircle2 />, 
+                                branches: [{ type: "yes", node: { label: "Fim", sub: "Sucesso", icon: <ArrowRight />, type: "end" } }]
+                              }
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -103,7 +128,12 @@ const Solucao = () => {
               branches: [
                 {
                   type: "no",
-                  node: { label: "Negado", sub: "Bilhete Inexistente", icon: <XCircle />, type: "end" }
+                  node: { 
+                    label: "Negado", 
+                    sub: "Inexistente", 
+                    icon: <XCircle />, 
+                    branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
+                  }
                 },
                 {
                   type: "yes",
@@ -115,11 +145,21 @@ const Solucao = () => {
                     branches: [
                       {
                         type: "no",
-                        node: { label: "Barrado", sub: "Porta ou Data Errada", icon: <AlertCircle />, type: "end" }
+                        node: { 
+                          label: "Barrado", 
+                          sub: "Inválido / Errado", 
+                          icon: <AlertCircle />, 
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
+                        }
                       },
                       {
                         type: "yes",
-                        node: { label: "Acesso", sub: "Portão Aberto", icon: <CheckCircle2 />, type: "end" }
+                        node: { 
+                          label: "Acesso", 
+                          sub: "Portão Aberto", 
+                          icon: <CheckCircle2 />, 
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Entrada Registada", icon: <ArrowRight />, type: "end" } }]
+                        }
                       }
                     ]
                   }
@@ -148,7 +188,12 @@ const Solucao = () => {
               branches: [
                 {
                   type: "no",
-                  node: { label: "Rejeitado", sub: "Fora de Prazo", icon: <XCircle />, type: "end" }
+                  node: { 
+                    label: "Rejeitado", 
+                    sub: "Ineligível", 
+                    icon: <XCircle />, 
+                    branches: [{ type: "yes", node: { label: "Fim", sub: "Pedido Negado", icon: <ArrowRight />, type: "end" } }]
+                  }
                 },
                 {
                   type: "yes",
@@ -159,7 +204,12 @@ const Solucao = () => {
                     branches: [
                       {
                         type: "yes",
-                        node: { label: "Concluído", sub: "ID Inutilizado", icon: <CheckCircle2 />, type: "end" }
+                        node: { 
+                          label: "Concluído", 
+                          sub: "ID Anulado", 
+                          icon: <CheckCircle2 />, 
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Finalizado", icon: <ArrowRight />, type: "end" } }]
+                        }
                       }
                     ]
                   }
