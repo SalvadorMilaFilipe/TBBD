@@ -216,54 +216,44 @@ const Solucao = () => {
       }
     },
     {
-      title: "Fluxo OFFLINE (Validação)",
+      title: "Fluxo Normal (Offline Simples)",
       color: "#a855f7",
       root: {
         label: "Leitura RFID",
-        sub: "Modo de Contingência",
+        sub: "Modo Offline",
         icon: <Zap />,
         branches: [
           {
             type: "yes",
             node: {
-              label: "Validar BD Local",
-              sub: "(Cache Offline)",
+              label: "Verificar Cache",
+              sub: "(base local)",
               icon: <Database />,
               branches: [
                 {
                   type: "yes",
                   node: {
-                    label: "Validar Acesso",
+                    label: "Existe e Válido?",
                     type: "decision",
-                    sub: "Estado/Porta",
+                    sub: "Check Local",
                     icon: <ShieldCheck />,
                     branches: [
                       {
                         type: "no",
                         node: { 
-                          label: "Negado", 
-                          sub: "Inválido ou Fora de Zona", 
+                          label: "Negar Acesso", 
+                          sub: "Entrada Recusada", 
                           icon: <XCircle />, 
-                          branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Recusado", icon: <ArrowRight />, type: "end" } }]
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
                         }
                       },
                       {
                         type: "yes",
                         node: {
-                          label: "Registo Local",
-                          sub: "Pendente de Sync",
-                          icon: <Database />,
-                          branches: [
-                            {
-                              type: "yes",
-                              node: { 
-                                label: "Permitir", 
-                                sub: "Portão Aberto", 
-                                icon: <CheckCircle2 />, 
-                                branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Offline", icon: <ArrowRight />, type: "end" } }]
-                              }
-                            }
-                          ]
+                          label: "Permitir Acesso",
+                          sub: "Registar entrada local",
+                          icon: <CheckCircle2 />,
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Acesso Offline", icon: <ArrowRight />, type: "end" } }]
                         }
                       }
                     ]
@@ -276,44 +266,94 @@ const Solucao = () => {
       }
     },
     {
-      title: "Fluxo de Reembolso (Caso Kanye)",
+      title: "Fluxo de Reembolso (Gestão de Crise)",
       color: "#f43f5e",
       root: {
         label: "Pedido Reembolso",
-        sub: "Portal Cliente",
+        sub: "Cliente pede reembolso",
         icon: <RefreshCcw />,
         branches: [
           {
             type: "yes",
             node: {
-              label: "Elegível?",
-              type: "decision",
+              label: "Validar elegibilidade",
               sub: "Check Regras",
               icon: <ShieldCheck />,
               branches: [
                 {
-                  type: "no",
-                  node: { 
-                    label: "Rejeitado", 
-                    sub: "Ineligível", 
-                    icon: <XCircle />, 
-                    branches: [{ type: "yes", node: { label: "Fim", sub: "Pedido Negado", icon: <ArrowRight />, type: "end" } }]
-                  }
-                },
-                {
                   type: "yes",
                   node: {
-                    label: "Sync Blacklist",
-                    sub: "Update Terminais",
-                    icon: <Network />,
+                    label: "Elegível?",
+                    type: "decision",
+                    sub: "Decisão do Sistema",
+                    icon: <ShieldCheck />,
                     branches: [
                       {
-                        type: "yes",
+                        type: "no",
                         node: { 
-                          label: "Concluído", 
-                          sub: "ID Anulado", 
-                          icon: <CheckCircle2 />, 
-                          branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Finalizado", icon: <ArrowRight />, type: "end" } }]
+                          label: "Rejeitar Pedido", 
+                          sub: "Ineligível", 
+                          icon: <XCircle />, 
+                          branches: [{ type: "yes", node: { label: "Fim", sub: "Processo Encerrado", icon: <ArrowRight />, type: "end" } }]
+                        }
+                      },
+                      {
+                        type: "yes",
+                        node: {
+                          label: "Atualizar Compra",
+                          sub: "Estado = Reembolsado",
+                          icon: <Database />,
+                          branches: [
+                            {
+                              type: "yes",
+                              node: {
+                                label: "Atualizar Bilhete",
+                                sub: "Estado = Inválido",
+                                icon: <XCircle />,
+                                branches: [
+                                  {
+                                    type: "yes",
+                                    node: {
+                                      label: "Add Blacklist",
+                                      sub: "Adicionar ID à Blacklist",
+                                      icon: <ShieldCheck />,
+                                      branches: [
+                                        {
+                                          type: "yes",
+                                          node: {
+                                            label: "Inc. Versão",
+                                            sub: "Incrementar Versão Bilhete",
+                                            icon: <Zap />,
+                                            branches: [
+                                              {
+                                                type: "yes",
+                                                node: {
+                                                  label: "Enviar Update",
+                                                  sub: "Propagar no Sistema",
+                                                  icon: <Network />,
+                                                  branches: [
+                                                    {
+                                                      type: "yes",
+                                                      node: {
+                                                        label: "Sync Leitores",
+                                                        sub: "Leitores recebem Blacklist",
+                                                        icon: <RefreshCcw />,
+                                                        branches: [{ type: "yes", node: { label: "Fim", sub: "Finalizado", icon: <ArrowRight />, type: "end" } }]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
