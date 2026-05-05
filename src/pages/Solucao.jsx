@@ -436,6 +436,64 @@ const Solucao = () => {
         ))}
       </div>
 
+      <motion.div 
+        className="glass-card" 
+        style={{ marginTop: '4rem', borderLeft: '4px solid #f43f5e', background: 'rgba(244, 63, 94, 0.02)' }}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <h2 style={{ color: '#f43f5e', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <RefreshCcw size={24} /> Query de Reembolso
+        </h2>
+        <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>
+          Esta query transacional garante a integridade dos dados ao processar um reembolso, 
+          atualizando o estado da ordem, da transação e registando o histórico na tabela de devoluções.
+        </p>
+        <pre style={{ 
+          background: 'rgba(0,0,0,0.3)', 
+          padding: '1.5rem', 
+          borderRadius: '12px', 
+          fontSize: '0.85rem',
+          color: '#e2e8f0',
+          overflowX: 'auto',
+          border: '1px solid rgba(255,255,255,0.05)',
+          fontFamily: 'monospace',
+          lineHeight: '1.6'
+        }}>
+{`BEGIN;
+
+-- 1. Atualizar a ordem como reembolsada
+UPDATE ordens
+SET estado_ordem = 'Reembolsado'
+WHERE ordem_id = 123;
+
+-- 2. Atualizar a transação associada
+UPDATE transacoes
+SET estado_pagamento = 'Reembolsado'
+WHERE ordem_id = 123;
+
+-- 3. Registar a devolução (reembolso) no histórico
+INSERT INTO devolucoes (
+    transacao_id,
+    valor_devolvido,
+    motivo,
+    estado_devolucao,
+    referencia_original
+)
+SELECT 
+    transacao_id,
+    valor,
+    'Cancelamento do evento',
+    'Processado',
+    referencia_gateway
+FROM transacoes
+WHERE ordem_id = 123;
+
+COMMIT;`}
+        </pre>
+      </motion.div>
+
       <style dangerouslySetInnerHTML={{ __html: `
         .logic-flows-wrapper {
           display: flex;
