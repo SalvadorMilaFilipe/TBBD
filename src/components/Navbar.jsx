@@ -23,7 +23,7 @@ const Navbar = () => {
         }}>
           <Database size={24} color="#0b0f19" />
         </div>
-        <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'white' }}>REEMBOLSO <span className="text-accent">WIRELESS</span></span>
+        <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'white' }}>REEMBOLSO WIRELESS <span className="text-accent">SALVADOR MILA</span></span>
       </div>
       <div className="nav-links">
         {links.map((link) => (
