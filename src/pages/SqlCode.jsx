@@ -108,6 +108,37 @@ ORDER BY investimento_total DESC;
         <p className="text-secondary">Definição de DDL e DML para escalabilidade massiva.</p>
       </motion.div>
 
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        className="glass-card" 
+        style={{ 
+          width: '100%', 
+          padding: '1.5rem', 
+          marginBottom: '3rem', 
+          textAlign: 'center',
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(0, 255, 136, 0.1)'
+        }}
+      >
+        <h3 style={{ color: 'var(--accent-color)', marginBottom: '1.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <Database size={20} /> Modelo Relacional (Diagrama ER)
+        </h3>
+        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <img 
+            src="/BD_Image.png" 
+            alt="Modelo Relacional" 
+            style={{ 
+              maxWidth: '100%', 
+              height: 'auto',
+              borderRadius: '8px', 
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+            }} 
+          />
+        </div>
+      </motion.div>
+
       <div className="glass-card" style={{ width: '100%', padding: '0', overflow: 'hidden', border: '1px solid rgba(0, 255, 136, 0.1)' }}>
         <div style={{ 
           background: 'rgba(255,255,255,0.05)', 
