@@ -109,34 +109,37 @@ ORDER BY investimento_total DESC;
       </motion.div>
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         className="glass-card" 
         style={{ 
           width: '100%', 
-          padding: '1.5rem', 
+          padding: '0', 
           marginBottom: '3rem', 
-          textAlign: 'center',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(0, 255, 136, 0.1)'
+          overflow: 'hidden',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
+          background: 'transparent'
         }}
       >
-        <h3 style={{ color: 'var(--accent-color)', marginBottom: '1.5rem', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-          <Database size={20} /> Modelo Relacional (Diagrama ER)
-        </h3>
-        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <img 
-            src="/BD_Image.png" 
-            alt="Modelo Relacional" 
-            style={{ 
-              maxWidth: '100%', 
-              height: 'auto',
-              borderRadius: '8px', 
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-            }} 
-          />
+        <div style={{ 
+          padding: '1.5rem', 
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(255,255,255,0.02)'
+        }}>
+          <h3 style={{ color: 'var(--accent-color)', margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <Database size={20} /> Modelo Relacional (Diagrama ER)
+          </h3>
         </div>
+        <img 
+          src="/BD_Image.png" 
+          alt="Modelo Relacional" 
+          style={{ 
+            width: '100%', 
+            display: 'block',
+            height: 'auto'
+          }} 
+        />
       </motion.div>
 
       <div className="glass-card" style={{ width: '100%', padding: '0', overflow: 'hidden', border: '1px solid rgba(0, 255, 136, 0.1)' }}>
